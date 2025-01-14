@@ -70,4 +70,12 @@ class GoogleSignInAndroid extends GoogleSignInPlatform {
   Future<bool> isSignedIn() {
     return CredentialUtil.instance.isSignedIn();
   }
+
+  @override
+  Future<GoogleSignInTokenData> getTokens({
+    required String email,
+    bool? shouldRecoverAuth,
+  }) {
+    return CredentialUtil.instance.getTokens();
+  }
 }

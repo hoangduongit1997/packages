@@ -3,6 +3,7 @@
 import 'dart:developer';
 
 import 'package:credential_manager/credential_manager.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
 class CredentialUtil {
   const CredentialUtil._internal();
@@ -21,9 +22,13 @@ class CredentialUtil {
     );
   }
 
-  Future<GoogleIdTokenCredential?> saveGoogleCredential() async {
+  Future<GoogleIdTokenCredential?> saveGoogleCredential({
+    bool useButtonFlow = true,
+  }) async {
     try {
-      return await _credentialManager.saveGoogleCredential();
+      return await _credentialManager.saveGoogleCredential(
+        useButtonFlow: useButtonFlow,
+      );
     } catch (e) {
       log('Error $e');
       return null;
@@ -47,6 +52,20 @@ class CredentialUtil {
     } catch (e) {
       log('Error $e');
       return false;
+    }
+  }
+
+  Future<GoogleSignInTokenData> getTokens() async {
+    try {
+      final Credentials credential = await _credentialManager.getCredentials();
+      return GoogleSignInTokenData(
+        accessToken: credential.googleIdTokenCredential?.idToken,
+        idToken: credential.googleIdTokenCredential?.idToken,
+        serverAuthCode: '',
+      );
+    } catch (e) {
+      log('Error $e');
+      return GoogleSignInTokenData();
     }
   }
 }
