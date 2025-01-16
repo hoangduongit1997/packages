@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:credential_manager/credential_manager.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
 import 'src/credential_util.dart';
@@ -40,20 +39,8 @@ class GoogleSignInAndroid extends GoogleSignInPlatform {
   }
 
   @override
-  Future<GoogleSignInUserData?> signIn() async {
-    final GoogleIdTokenCredential? rs =
-        await CredentialUtil.instance.saveGoogleCredential();
-    if (rs == null) {
-      return null;
-    }
-    return GoogleSignInUserData(
-      email: rs.email,
-      id: '',
-      displayName: rs.displayName,
-      photoUrl: rs.profilePictureUri.toString(),
-      idToken: rs.idToken,
-      serverAuthCode: '',
-    );
+  Future<GoogleSignInUserData?> signIn() {
+    return CredentialUtil.instance.signIn();
   }
 
   @override
@@ -77,5 +64,26 @@ class GoogleSignInAndroid extends GoogleSignInPlatform {
     bool? shouldRecoverAuth,
   }) {
     return CredentialUtil.instance.getTokens();
+  }
+
+  @override
+  Future<GoogleSignInUserData?> signInSilently() {
+    return CredentialUtil.instance.signInSilently();
+  }
+
+  @override
+  Future<void> clearAuthCache({required String token}) {
+    return CredentialUtil.instance.logout();
+  }
+
+  @override
+  Future<bool> requestScopes(List<String> scopes) async {
+    return false;
+  }
+
+  @override
+  Future<bool> canAccessScopes(List<String> scopes,
+      {String? accessToken}) async {
+    return false;
   }
 }

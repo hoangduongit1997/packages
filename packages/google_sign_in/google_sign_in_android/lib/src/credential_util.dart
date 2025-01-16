@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, avoid_setters_without_getters
 
 import 'dart:developer';
 
@@ -6,13 +6,14 @@ import 'package:credential_manager/credential_manager.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
 class CredentialUtil {
-  const CredentialUtil._internal();
+  CredentialUtil._internal();
   static CredentialUtil get instance => _instance;
-  static const CredentialUtil _instance = CredentialUtil._internal();
+  static final CredentialUtil _instance = CredentialUtil._internal();
   static final CredentialManager _credentialManager = CredentialManager();
+  GoogleIdTokenCredential? _googleIdTokenCredential;
 
   Future<void> init({
-    bool preferImmediatelyAvailableCredentials = false,
+    bool preferImmediatelyAvailableCredentials = true,
     String? googleClientId,
   }) async {
     await _credentialManager.init(
@@ -37,7 +38,8 @@ class CredentialUtil {
 
   Future<void> logout() async {
     try {
-      return await _credentialManager.logout();
+      await _credentialManager.logout();
+      _googleIdTokenCredential = null;
     } catch (e) {
       log('Error $e');
     }
@@ -45,10 +47,7 @@ class CredentialUtil {
 
   Future<bool> isSignedIn() async {
     try {
-      final Credentials credential = await _credentialManager.getCredentials();
-      return credential.googleIdTokenCredential != null ||
-          credential.passwordCredential != null ||
-          credential.publicKeyCredential != null;
+      return _googleIdTokenCredential != null;
     } catch (e) {
       log('Error $e');
       return false;
@@ -57,15 +56,55 @@ class CredentialUtil {
 
   Future<GoogleSignInTokenData> getTokens() async {
     try {
-      final Credentials credential = await _credentialManager.getCredentials();
       return GoogleSignInTokenData(
-        accessToken: credential.googleIdTokenCredential?.idToken,
-        idToken: credential.googleIdTokenCredential?.idToken,
+        accessToken: _googleIdTokenCredential?.idToken,
+        idToken: _googleIdTokenCredential?.idToken,
         serverAuthCode: '',
       );
     } catch (e) {
       log('Error $e');
       return GoogleSignInTokenData();
+    }
+  }
+
+  set saveGoogleIdTokenCredential(GoogleIdTokenCredential credential) {
+    _googleIdTokenCredential = credential;
+  }
+
+  Future<GoogleSignInUserData?> signIn() async {
+    try {
+      final GoogleIdTokenCredential? rs = await saveGoogleCredential();
+      if (rs == null) {
+        return null;
+      }
+      saveGoogleIdTokenCredential = rs;
+      return GoogleSignInUserData(
+        email: rs.email,
+        id: rs.email,
+        displayName: rs.displayName,
+        photoUrl: rs.profilePictureUri.toString(),
+        idToken: rs.idToken,
+        serverAuthCode: '',
+      );
+    } catch (e) {
+      log('Error $e');
+      return null;
+    }
+  }
+
+  Future<GoogleSignInUserData?> signInSilently() async {
+    try {
+      return GoogleSignInUserData(
+        email: _googleIdTokenCredential?.email ?? '',
+        id: _googleIdTokenCredential?.email ?? '',
+        displayName: _googleIdTokenCredential?.displayName,
+        photoUrl: _googleIdTokenCredential?.profilePictureUri.toString(),
+        idToken: _googleIdTokenCredential?.idToken,
+        serverAuthCode: '',
+      );
+    } catch (e) {
+      log('Error $e');
+      return null;
     }
   }
 }
