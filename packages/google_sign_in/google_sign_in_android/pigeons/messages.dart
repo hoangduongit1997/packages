@@ -79,7 +79,6 @@ abstract class GoogleSignInApi {
 
   /// Requests the access token for the current sign in.
   @async
-  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   String getAccessToken(String email, bool shouldRecoverAuth);
 
   /// Signs out the current user.
@@ -95,7 +94,7 @@ abstract class GoogleSignInApi {
 
   /// Clears the authentication caching for the given token, requiring a
   /// new sign in.
-  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  @async
   void clearAuthCache(String token);
 
   /// Requests access to the given scopes.
