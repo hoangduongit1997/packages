@@ -18,6 +18,7 @@ flutter:
         pluginClass: GoogleSignInPlugin
 
 dependencies:
+  credential_manager: 2.0.2
   flutter:
     sdk: flutter
   google_sign_in_platform_interface: ^2.2.0

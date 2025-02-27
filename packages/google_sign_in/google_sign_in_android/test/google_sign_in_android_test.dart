@@ -33,7 +33,7 @@ void main() {
 
   setUp(() {
     api = MockGoogleSignInApi();
-    googleSignIn = GoogleSignInAndroid(api: api);
+    googleSignIn = GoogleSignInAndroid();
   });
 
   test('registered instance', () {
